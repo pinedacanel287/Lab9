@@ -1,0 +1,48 @@
+#include <Arduino.h>
+
+//Definir pines de entradas
+#define Pot1 13
+#define Pot2 12
+#define Referencia 23
+
+//Variables globales
+int Inter = 0, Res = 0;
+float Val;
+void setup() {
+
+  //Comenzar la comunicación serial con la cocmputadora
+  Serial.begin(115200);
+
+  //Comienza la comunicación seria con el STM32
+  Serial2.begin(115200);
+
+  //Configuración de pines
+  pinMode(Pot1, INPUT);
+  pinMode(Pot2, INPUT);
+  analogSetVRefPin(Referencia);
+}
+
+void loop() {
+
+  while (Serial2.available() == 0)
+  {
+    Val = analogReadMilliVolts(Pot1);
+    Serial.println(Val);
+  }
+
+  if (Serial2.available() == 1) {
+    Serial.println("Disponible...");
+    Inter = Serial2.read();
+    Serial.println(Inter);
+    if (Inter == 1) {
+        Val = analogReadMilliVolts(Pot1);
+    } else if (Inter == 2) {
+        Val = analogReadMilliVolts(Pot2);
+    }
+    Res = map(Val, 0, 3126, 0, 15);
+    Serial.println(Res);
+    
+    Serial2.write(Res);
+
+  }
+}
